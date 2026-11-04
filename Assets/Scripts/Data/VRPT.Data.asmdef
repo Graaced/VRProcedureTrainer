@@ -1,0 +1,16 @@
+{
+    "name": "VRPT.Data",
+    "rootNamespace": "",
+    "references": [
+        "GUID:edcd5bd9c37c28f4ba68a25208e5f34b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
