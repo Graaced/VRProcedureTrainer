@@ -40,8 +40,6 @@ namespace VRPT.Presentation
         /** Reports an action to every listener; to be called by derived classes */
         protected void Raise(ControlAction action)
         {
-            
-            Debug.Log($"Control {controlId.Id} -> {action}", this);
             ActionPerformed?.Invoke(controlId, action);
         }
     }
