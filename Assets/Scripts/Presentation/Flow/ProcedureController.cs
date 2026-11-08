@@ -9,7 +9,8 @@ namespace VRPT.Presentation
     /**
      * CLASS: ProcedureController
      * DESCRIPTION: The only bridge between the Unity scene and the procedure logic.
-     * It forwards what the user does on the machine to the runner, which stays free of Unity.
+     * It forwards what the user does on the machine to the runner, which stays free of Unity,
+     * and shows the result through the highlight and the panel.
      * It must sit on a parent of all the machine controls.
      *
      */
@@ -18,24 +19,44 @@ namespace VRPT.Presentation
         /** Procedure the user must perform */
         [SerializeField] private TrainingProcedure procedure;
 
+        /** Lights up the control of the current step */
+        [SerializeField] private HighlightService highlightService;
+
+        /** Shows the current step and the mistakes */
+        [SerializeField] private InstructionPanel instructionPanel;
+
         /** Judges the actions of the user */
         private ProcedureRunner runner;
 
         /** Every machine control found under this object */
         private IMachineControl[] controls;
 
+        /** Name shown to the user for each control, by control id */
+        private Dictionary<string, string> controlNames;
+
         /** Validates the setup and creates the runner */
         private void Awake()
         {
-            if (procedure == null)
+            // Single & on purpose: every missing reference gets logged, not just the first
+            bool isValid = IsAssigned(procedure, nameof(procedure))
+                & IsAssigned(highlightService, nameof(highlightService))
+                & IsAssigned(instructionPanel, nameof(instructionPanel));
+
+            if (!isValid)
             {
-                Debug.LogError($"[{name}] Missing reference to {nameof(procedure)}", this);
                 enabled = false;
                 return;
             }
 
             // Includes inactive objects: a control hidden at the start must still be listened to
             controls = GetComponentsInChildren<IMachineControl>(true);
+
+            controlNames = new Dictionary<string, string>();
+            foreach (IMachineControl control in controls)
+            {
+                if (control.ControlId != null)
+                    controlNames[control.ControlId.Id] = control.ControlId.DisplayName;
+            }
 
             ProcedureDefinition definition;
             try
@@ -61,6 +82,9 @@ namespace VRPT.Presentation
         /** Starts listening to the controls and to the runner */
         private void OnEnable()
         {
+            if (runner == null)
+                return;
+
             foreach (IMachineControl control in controls)
                 control.ActionPerformed += HandleControlAction;
 
@@ -73,6 +97,10 @@ namespace VRPT.Presentation
         /** Stops listening to the controls and to the runner */
         private void OnDisable()
         {
+            // A failed Awake disables the component before any runner exists
+            if (runner == null)
+                return;
+
             foreach (IMachineControl control in controls)
                 control.ActionPerformed -= HandleControlAction;
 
@@ -82,11 +110,11 @@ namespace VRPT.Presentation
             runner.Finished -= HandleFinished;
         }
 
-        /** Starts the timer of the procedure */
+        /** Starts the timer and guides the user to the first step */
         private void Start()
         {
             runner.Start();
-            Debug.Log($"[{name}] Procedure '{procedure.name}' started", this);
+            ShowCurrentStep();
         }
 
         /** Passes an action of the user to the runner */
@@ -95,44 +123,53 @@ namespace VRPT.Presentation
             runner.RegisterAction(control.Id, action);
         }
 
-        /** Logs a completed step */
+        /** Moves the guidance to the next step, if there is one */
         private void HandleStepCompleted(StepCompletedInfo info)
         {
-            Debug.Log($"[{name}] Step '{info.StepId}' completed at {info.AtSeconds:F1}s", this);
+            if (runner.State == RunnerState.Running)
+                ShowCurrentStep();
         }
 
-        /** Logs a mistake of the user */
+        /** Shows a mistake of the user */
         private void HandleErrorOccurred(ProcedureError error)
         {
-            Debug.Log($"[{name}] {error.Type} error on step '{error.StepId}': control '{error.ControlId}' at {error.AtSeconds:F1}s", this);
+            string controlName = controlNames[error.ControlId];
+
+            if (error.Type == ProcedureErrorType.Critical)
+                instructionPanel.ShowCriticalError(controlName);
+            else
+                instructionPanel.ShowWrongOrder(controlName);
         }
 
-        /** Logs a use of the emergency stop */
+        /** Logs a use of the emergency stop, which is never shown as a mistake */
         private void HandleEmergencyRecorded(ControlAction action, double atSeconds)
         {
             Debug.Log($"[{name}] Emergency stop {action} at {atSeconds:F1}s", this);
         }
 
-        /** Logs the end of the procedure */
+        /** Removes the guidance and shows the outcome */
         private void HandleFinished(RunnerState state)
         {
-            Debug.Log($"[{name}] Procedure finished: {state}", this);
+            highlightService.Clear();
+            instructionPanel.ShowFinished(state == RunnerState.Completed);
+        }
+
+        /** Highlights the control of the current step and shows its instruction */
+        private void ShowCurrentStep()
+        {
+            StepDefinition step = runner.Steps[runner.CurrentStepIndex];
+
+            highlightService.Highlight(step.ControlId);
+            instructionPanel.ShowStep(runner.CurrentStepIndex + 1, runner.Steps.Count, step.Instruction);
         }
 
         /** Checks the scene has the control of every step, otherwise the procedure could never end */
         private bool HasEveryStepControl(ProcedureDefinition definition)
         {
-            HashSet<string> sceneControlIds = new HashSet<string>();
-            foreach (IMachineControl control in controls)
-            {
-                if (control.ControlId != null)
-                    sceneControlIds.Add(control.ControlId.Id);
-            }
-
             bool isValid = true;
             foreach (StepDefinition step in definition.Steps)
             {
-                if (sceneControlIds.Contains(step.ControlId))
+                if (controlNames.ContainsKey(step.ControlId))
                     continue;
 
                 Debug.LogError($"[{name}] No control '{step.ControlId}' under this object, needed by step '{step.Id}'", this);
@@ -140,6 +177,16 @@ namespace VRPT.Presentation
             }
 
             return isValid;
+        }
+
+        /** Logs an error when a required reference is missing */
+        private bool IsAssigned(UnityEngine.Object reference, string fieldName)
+        {
+            if (reference != null)
+                return true;
+
+            Debug.LogError($"[{name}] Missing reference to {fieldName}", this);
+            return false;
         }
     }
 }
