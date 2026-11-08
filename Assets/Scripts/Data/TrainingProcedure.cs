@@ -91,6 +91,10 @@ namespace VRPT.Data
         /** Reports problems as soon as the asset is edited in the Inspector */
         private void OnValidate()
         {
+            // Unity can also validate a temporary instance: only a saved asset always has a name
+            if (string.IsNullOrEmpty(name))
+                return;
+
             foreach (string problem in FindProblems())
                 Debug.LogError($"[{name}] {problem}", this);
         }
