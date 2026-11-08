@@ -4133,7 +4133,7 @@ MeshRenderer:
   m_Materials:
   - {fileID: -1288433377878221427, guid: b8b769f869aacd34090f530006aa0902, type: 3}
   - {fileID: -5755059500378655718, guid: b8b769f869aacd34090f530006aa0902, type: 3}
-  - {fileID: -3302684508999970443, guid: b8b769f869aacd34090f530006aa0902, type: 3}
+  - {fileID: 2100000, guid: ecb66c401275384a1eb7db502d62eef4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5052,7 +5052,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -3302684508999970443, guid: b8b769f869aacd34090f530006aa0902, type: 3}
-  - {fileID: -3851852064874742547, guid: b8b769f869aacd34090f530006aa0902, type: 3}
+  - {fileID: 2100000, guid: ecb66c401275384a1eb7db502d62eef4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5167,6 +5167,8 @@ GameObject:
   - component: {fileID: 3258839587720587579}
   - component: {fileID: 3520009019372343241}
   - component: {fileID: 1518379787609930148}
+  - component: {fileID: 4316645235961099169}
+  - component: {fileID: 4316645235961099170}
   m_Layer: 0
   m_Name: LevaValvola
   m_TagString: Untagged
@@ -5174,6 +5176,110 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!65 &4316645235961099169
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4316645235961099168}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.1, y: 0.18, z: 0.08}
+  m_Center: {x: 0, y: 0.04, z: 0.035}
+--- !u!114 &4316645235961099170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4316645235961099168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a6fa604aa819e542a4e460949201588, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VRPT.Presentation::VRPT.Presentation.RotarySwitch
+  m_InteractionManager: {fileID: 0}
+  m_Colliders: []
+  m_InteractionLayers:
+    m_Bits: 1
+  m_DistanceCalculationMode: 1
+  m_SelectMode: 0
+  m_FocusMode: 1
+  m_CustomReticle: {fileID: 0}
+  m_AllowGazeInteraction: 0
+  m_AllowGazeSelect: 0
+  m_OverrideGazeTimeToSelect: 0
+  m_GazeTimeToSelect: 0.5
+  m_OverrideTimeToAutoDeselectGaze: 0
+  m_TimeToAutoDeselectGaze: 3
+  m_AllowGazeAssistance: 0
+  m_FirstHoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastHoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstSelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastSelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstFocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastFocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Activated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Deactivated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_StartingHoverFilters: []
+  m_StartingSelectFilters: []
+  m_StartingInteractionStrengthFilters: []
+  m_AutoFindParentInteractableInHierarchy: 0
+  m_ParentInteractableObject: {fileID: 0}
+  controlId: {fileID: 11400000, guid: fac89cae26c8ddb49bcaa78dde44c799, type: 2}
+  rotatingPart: {fileID: 2396436040146272169}
+  rotationAxis: {x: 0, y: 0, z: 1}
+  firstAngle: 0
+  secondAngle: -90
+  positionThreshold: 0.5
+  rotationSpeed: 360
+  dragThreshold: 8
+  allowClickToggle: 1
 --- !u!33 &4321846695144733659
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -6385,6 +6491,9 @@ MonoBehaviour:
   - control: {fileID: 11400000, guid: 22b7d5d0ecfa380499a088116149d015, type: 2}
     renderers:
     - {fileID: 5631243638145019645}
+  - control: {fileID: 11400000, guid: fac89cae26c8ddb49bcaa78dde44c799, type: 2}
+    renderers:
+    - {fileID: 3813676917946813261}
   highlightColor: {r: 1, g: 0.7, b: 0.1, a: 1}
   minIntensity: 0.1
   maxIntensity: 1.5
