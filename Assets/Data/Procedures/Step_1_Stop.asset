@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bac70841c189b5438b2c41daa86f6ee, type: 3}
+  m_Name: Step_1_Stop
+  m_EditorClassIdentifier: VRPT.Data::VRPT.Data.ProcedureStep
+  id: stop
+  instruction: Stop the machine with the STOP button.
+  expectedControl: {fileID: 11400000, guid: 2195c418c16fc934b9a07260a8324af6, type: 2}
+  expectedAction: 0
+  criticalControls:
+  - {fileID: 11400000, guid: 22b7d5d0ecfa380499a088116149d015, type: 2}
