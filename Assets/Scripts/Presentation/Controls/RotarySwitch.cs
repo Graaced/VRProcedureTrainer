@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using VRPT.Core;
 
 namespace VRPT.Presentation
@@ -39,6 +40,9 @@ namespace VRPT.Presentation
         /** Current position of the switch; the machine starts powered */
         private bool isOn = true;
 
+        /** True while the padlock prevents the switch from moving */
+        private bool isLocked;
+
         /** Current local Z angle of the handle, in degrees */
         private float currentAngle;
 
@@ -70,6 +74,19 @@ namespace VRPT.Presentation
             ApplyAngle();
         }
 
+        /** Blocks or frees the switch; called when the padlock is inserted or removed */
+        public void SetLocked(bool locked)
+        {
+            isLocked = locked;
+        }
+
+        /** A locked switch refuses every new select */
+        public override bool IsSelectableBy(IXRSelectInteractor interactor)
+        {
+            return !isLocked && base.IsSelectableBy(interactor);
+        }
+
+
         /** Prepares a new drag */
         protected override void OnSelectEntered(SelectEnterEventArgs args)
         {
@@ -87,8 +104,8 @@ namespace VRPT.Presentation
             bool wasDragging = isDragging;
             isDragging = false;
 
-            // A canceled select is not a user decision: the handle returns to its position
-            if (args.isCanceled)
+            // A canceled or locked select is not a user decision: the handle returns to its position
+            if (args.isCanceled || isLocked)
                 return;
 
             if (wasDragging)
