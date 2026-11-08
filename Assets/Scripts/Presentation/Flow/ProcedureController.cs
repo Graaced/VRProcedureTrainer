@@ -25,6 +25,9 @@ namespace VRPT.Presentation
         /** Shows the current step and the mistakes */
         [SerializeField] private InstructionPanel instructionPanel;
 
+        /** Confirms outcomes with sound and vibration */
+        [SerializeField] private FeedbackPlayer feedbackPlayer;
+
         /** Judges the actions of the user */
         private ProcedureRunner runner;
 
@@ -40,7 +43,8 @@ namespace VRPT.Presentation
             // Single & on purpose: every missing reference gets logged, not just the first
             bool isValid = IsAssigned(procedure, nameof(procedure))
                 & IsAssigned(highlightService, nameof(highlightService))
-                & IsAssigned(instructionPanel, nameof(instructionPanel));
+                & IsAssigned(instructionPanel, nameof(instructionPanel))
+                & IsAssigned(feedbackPlayer, nameof(feedbackPlayer));
 
             if (!isValid)
             {
@@ -123,16 +127,20 @@ namespace VRPT.Presentation
             runner.RegisterAction(control.Id, action);
         }
 
-        /** Moves the guidance to the next step, if there is one */
+        /** Confirms the step and moves the guidance to the next one, if there is one */
         private void HandleStepCompleted(StepCompletedInfo info)
         {
+            feedbackPlayer.PlaySuccess();
+
             if (runner.State == RunnerState.Running)
                 ShowCurrentStep();
         }
 
-        /** Shows a mistake of the user */
+        /** Signals a mistake of the user */
         private void HandleErrorOccurred(ProcedureError error)
         {
+            feedbackPlayer.PlayError();
+
             string controlName = controlNames[error.ControlId];
 
             if (error.Type == ProcedureErrorType.Critical)
