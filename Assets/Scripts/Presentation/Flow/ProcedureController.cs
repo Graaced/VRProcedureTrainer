@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using VRPT.Core;
 using VRPT.Data;
@@ -28,8 +29,17 @@ namespace VRPT.Presentation
         /** Confirms outcomes with sound and vibration */
         [SerializeField] private FeedbackPlayer feedbackPlayer;
 
+        /** Shows the result of the session */
+        [SerializeField] private ReportPanel reportPanel;
+
         /** Judges the actions of the user */
         private ProcedureRunner runner;
+
+        /** Collects what happens into the report */
+        private ReportBuilder reportBuilder;
+
+        /** Saves the report to disk */
+        private ReportWriter reportWriter;
 
         /** Every machine control found under this object */
         private IMachineControl[] controls;
@@ -44,7 +54,8 @@ namespace VRPT.Presentation
             bool isValid = IsAssigned(procedure, nameof(procedure))
                 & IsAssigned(highlightService, nameof(highlightService))
                 & IsAssigned(instructionPanel, nameof(instructionPanel))
-                & IsAssigned(feedbackPlayer, nameof(feedbackPlayer));
+                & IsAssigned(feedbackPlayer, nameof(feedbackPlayer))
+                & IsAssigned(reportPanel, nameof(reportPanel));
 
             if (!isValid)
             {
@@ -81,6 +92,8 @@ namespace VRPT.Presentation
             }
 
             runner = new ProcedureRunner(definition, new UnityClock());
+            reportBuilder = new ReportBuilder(definition, runner, DateTime.UtcNow);
+            reportWriter = new ReportWriter(Path.Combine(Application.persistentDataPath, "Reports"));
         }
 
         /** Starts listening to the controls and to the runner */
@@ -94,8 +107,8 @@ namespace VRPT.Presentation
 
             runner.StepCompleted += HandleStepCompleted;
             runner.ErrorOccurred += HandleErrorOccurred;
-            runner.EmergencyRecorded += HandleEmergencyRecorded;
             runner.Finished += HandleFinished;
+            reportBuilder.ReportReady += HandleReportReady;
         }
 
         /** Stops listening to the controls and to the runner */
@@ -110,8 +123,8 @@ namespace VRPT.Presentation
 
             runner.StepCompleted -= HandleStepCompleted;
             runner.ErrorOccurred -= HandleErrorOccurred;
-            runner.EmergencyRecorded -= HandleEmergencyRecorded;
             runner.Finished -= HandleFinished;
+            reportBuilder.ReportReady -= HandleReportReady;
         }
 
         /** Starts the timer and guides the user to the first step */
@@ -149,17 +162,18 @@ namespace VRPT.Presentation
                 instructionPanel.ShowWrongOrder(controlName);
         }
 
-        /** Logs a use of the emergency stop, which is never shown as a mistake */
-        private void HandleEmergencyRecorded(ControlAction action, double atSeconds)
-        {
-            Debug.Log($"[{name}] Emergency stop {action} at {atSeconds:F1}s", this);
-        }
-
         /** Removes the guidance and shows the outcome */
         private void HandleFinished(RunnerState state)
         {
             highlightService.Clear();
             instructionPanel.ShowFinished(state == RunnerState.Completed);
+        }
+
+        /** Saves the report and shows it, even if the save failed */
+        private void HandleReportReady(ProcedureReport report)
+        {
+            bool isSaved = reportWriter.TrySave(report, out string saveResult);
+            reportPanel.Show(report, controlNames, isSaved, saveResult);
         }
 
         /** Highlights the control of the current step and shows its instruction */

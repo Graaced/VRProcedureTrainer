@@ -43,7 +43,7 @@ namespace VRPT.Core
         public IReadOnlyList<StepDefinition> Steps => definition.Steps;
 
         /** Seconds elapsed since the procedure started */
-        private double ElapsedSeconds => clock.NowSeconds - startedAtSeconds;
+        public double ElapsedSeconds => clock.NowSeconds - startedAtSeconds;
 
         /** Validates the definition; throws ArgumentException if it is not valid */
         public ProcedureRunner(ProcedureDefinition definition, IClock clock)

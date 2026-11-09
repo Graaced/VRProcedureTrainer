@@ -40,6 +40,13 @@ namespace VRPT.Presentation
         [Min(1f)]
         [SerializeField] private float flywheelAcceleration = 180f;
 
+        /** Ram of the press, which starts at the top of its stroke */
+        [SerializeField] private Transform ram;
+
+        /** Distance the ram travels down, in meters */
+        [Min(0f)]
+        [SerializeField] private float ramStroke = 0.18f;
+
         /** Lit while the machine has power */
         [SerializeField] private IndicatorLamp powerLamp;
 
@@ -68,6 +75,12 @@ namespace VRPT.Presentation
         /** Current flywheel speed, in degrees per second */
         private float flywheelSpeed;
 
+        /** Position of the crank that drives the ram, in degrees */
+        private float crankAngle;
+
+        /** Local position of the ram at the top of its stroke */
+        private Vector3 ramTopPosition;
+
         /** Validates the setup; the machine is already running when the scene starts */
         private void Awake()
         {
@@ -78,6 +91,7 @@ namespace VRPT.Presentation
                 & IsAssigned(isolator, nameof(isolator))
                 & IsAssigned(lockSocket, nameof(lockSocket))
                 & IsAssigned(flywheel, nameof(flywheel))
+                & IsAssigned(ram, nameof(ram))
                 & IsAssigned(powerLamp, nameof(powerLamp))
                 & IsAssigned(runningLamp, nameof(runningLamp))
                 & IsAssigned(voltageDisplay, nameof(voltageDisplay));
@@ -90,6 +104,8 @@ namespace VRPT.Presentation
             }
 
             flywheelSpeed = flywheelMaxSpeed;
+            crankAngle = 0f;
+            ramTopPosition = ram.localPosition;
         }
 
         /** Applies the initial rules once every control has finished its own Awake */
@@ -121,12 +137,24 @@ namespace VRPT.Presentation
             lockSocket.ActionPerformed -= HandleLockSocket;
         }
 
-        /** Spins the flywheel up or down towards the speed of the current state */
+        /** Spins the flywheel up or down towards the speed of the current state, and the ram with it */
         private void Update()
         {
             float targetSpeed = isRunning ? flywheelMaxSpeed : 0f;
             flywheelSpeed = Mathf.MoveTowards(flywheelSpeed, targetSpeed, flywheelAcceleration * Time.deltaTime);
-            flywheel.Rotate(Vector3.right, flywheelSpeed * Time.deltaTime, Space.Self);
+
+            float rotation = flywheelSpeed * Time.deltaTime;
+            flywheel.Rotate(Vector3.right, rotation, Space.Self);
+            MoveRam(rotation);
+        }
+
+        /** Moves the ram as a crank would: one full stroke for each turn of the flywheel */
+        private void MoveRam(float rotation)
+        {
+            crankAngle = Mathf.Repeat(crankAngle + rotation, 360f);
+
+            float strokeFraction = (1f - Mathf.Cos(crankAngle * Mathf.Deg2Rad)) * 0.5f;
+            ram.localPosition = ramTopPosition + Vector3.down * (ramStroke * strokeFraction);
         }
 
         /** STOP always stops the machine */
