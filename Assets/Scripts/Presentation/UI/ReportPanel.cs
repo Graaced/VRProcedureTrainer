@@ -11,7 +11,7 @@ namespace VRPT.Presentation
 {
     /**
      * CLASS: ReportPanel
-     * DESCRIPTION: Shows the result of the session, with a button to try again.
+     * DESCRIPTION: Shows the result of the session, with buttons to try again or close the application.
      * It stays hidden until the procedure ends, and covers the instructions when it appears.
      *
      */
@@ -29,6 +29,9 @@ namespace VRPT.Presentation
         /** Button that restarts the session */
         [SerializeField] private Button retryButton;
 
+        /** Button that closes the application */
+        [SerializeField] private Button exitButton;
+
         /** Most recent mistakes listed; the last one is what ended a failed session */
         [Min(1)]
         [SerializeField] private int maxListedErrors = 5;
@@ -36,14 +39,15 @@ namespace VRPT.Presentation
         /** Validates the setup and hides the panel until the procedure ends */
         private void Awake()
         {
-            if (reportText == null || retryButton == null)
+            if (reportText == null || retryButton == null || exitButton == null)
             {
-                Debug.LogError($"[{name}] Missing reference to {nameof(reportText)} or {nameof(retryButton)}", this);
+                Debug.LogError($"[{name}] Missing reference to {nameof(reportText)}, {nameof(retryButton)} or {nameof(exitButton)}", this);
                 enabled = false;
             }
             else
             {
                 retryButton.onClick.AddListener(HandleRetryClicked);
+                exitButton.onClick.AddListener(ApplicationExit.Quit);
 
                 // Windows paths hold backslashes: "\report" would be read as a carriage return
                 reportText.parseCtrlCharacters = false;
@@ -52,11 +56,14 @@ namespace VRPT.Presentation
             gameObject.SetActive(false);
         }
 
-        /** Stops listening to the button */
+        /** Stops listening to the buttons */
         private void OnDestroy()
         {
             if (retryButton != null)
                 retryButton.onClick.RemoveListener(HandleRetryClicked);
+
+            if (exitButton != null)
+                exitButton.onClick.RemoveListener(ApplicationExit.Quit);
         }
 
         /** Shows the report; the save result is the file path, or the reason it could not be saved */
